@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 rusqlite = "0.23.1"
 sophia_jsonld = "0.5.2"
-structopt = "0.3.14"
+structopt = "0.3"

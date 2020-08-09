@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, Result, Error};
 use std::path::{Path, PathBuf};
 
 
@@ -28,18 +28,18 @@ struct Edge {
 }
 
 #[derive(Debug)]
-pub struct Database<'a> {
-    path: &'a Path,
+pub struct Database {
+    path: PathBuf,
     conn: Option<Connection>,
 }
 
-impl<'a> Database<'a> {
-    pub fn new(path: &'a Path, overwrite: bool) -> Result<Self, Box<dyn std::error::Error>> {
+impl Database {
+    pub fn new(path: &PathBuf, overwrite: bool) -> Result<Self, Box<dyn std::error::Error>> {
         if &path.exists() & !overwrite {
             panic!("DB file '{:?}' already exists.", &path);
         }
-        let konn = Connection::open(&path)?;
-        Ok(Database { path: &path, conn: Some(konn) })
+        let konn = Connection::open(path)?;
+        Ok(Database { path: *path, conn: Some(konn) })
     }
 
     pub fn open(&mut self) {
@@ -48,12 +48,12 @@ impl<'a> Database<'a> {
         }
     }
 
-    pub fn close(&mut self) {
-        if let Some(konn) = &self.conn {
-            // Doesn't verking!
-            if let Ok(_) = &konn.close() {
-                self.conn = None
-            }
+    // pub fn close(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn close(&mut self) -> Result<(), (Connection, Error)> {
+        if let Some(konn) = &self.conn.take() {
+            konn.close()
+        } else {
+            Ok(())
         }
     }
 }

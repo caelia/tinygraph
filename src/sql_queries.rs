@@ -1,12 +1,12 @@
-/* sql_queries.rs -- SQL queries for Sukkiri.
-   Copyright © 2015 by Matthew C. Gushee <matt@gushee.net>
+/* sql_queries.rs -- SQL queries for TinyGraph.
+   Copyright © 2020 by Caelia R. Chapin <matt@gushee.net>
    This program is open-source software, released under the BSD license.
    See the accompanying LICENSE file for details. */
 
 // IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 // -----  DATABASE SETUP  --------------------------------------------------
 
-mod sqlite3_pgsql {
+pub mod sqlite3_pgsql {
     pub const CREATE_PRIMITIVE_TABLE: &'static str =
       "CREATE TABLE primitives (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,6 +23,7 @@ mod sqlite3_pgsql {
         "INSERT INTO primitives (name) VALUES ('period');",
         "INSERT INTO primitives (name) VALUES ('nref');",
         "INSERT INTO primitives (name) VALUES ('rref');",
+        // What is sref??
         "INSERT INTO primitives (name) VALUES ('sref');",
         "INSERT INTO primitives (name) VALUES ('xref');"];
     
@@ -45,6 +46,7 @@ mod sqlite3_pgsql {
         description TEXT
       );";
     
+    // Why does a vocab item have a name and a term?
     pub const CREATE_VOCAB_TABLE: &'static str =
       "CREATE TABLE vocab_types (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

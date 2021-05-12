@@ -1,7 +1,11 @@
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
 use rusqlite::{params, Connection, Result, Error};
 use std::path::{Path, PathBuf};
+
+mod sql_queries;
+use crate::sql_queries::sqlite3_pgsql::*;
 
 pub trait TGStore {
     type GeneralResult;
@@ -93,8 +97,19 @@ impl TGStore for SqliteTGStore {
     
 #[cfg(test)]
 mod tests {
+    use std::env::temp_dir;
+    use super::{TGStore, SqliteTGStore};
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn create_store_test() {
+        let mut path = temp_dir();
+        path.push("tg-test");
+        path.set_extension("db");
+        let mut store = super::SqliteTGStore { path, conn: None };
+        let res = store.connect();
+        match store.connect() {
+            Ok(_) => assert!(true),
+            Err(_) => assert!(false),
+        }
     }
 }

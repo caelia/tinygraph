@@ -3,6 +3,23 @@
 
 use rusqlite::{params, Connection, Result, Error};
 use std::path::{Path, PathBuf};
+use std::error::Error as StdError;
+use std::fmt;
+
+#[derive(Debug,Clone)]
+struct UnknownError;
+
+impl StdError for UnknownError {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        None
+    }
+}
+
+impl fmt::Display for UnknownError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Unknown error!")
+    }
+}
 
 mod sql_queries;
 use crate::sql_queries::sqlite3_pgsql::*;
@@ -44,14 +61,14 @@ struct Edge {
 
 #[derive(Debug)]
 pub struct SqliteTGStore {
-    path: PathBuf,
-    conn: Option<Box<Connection>>,
+    pub path: PathBuf,
+    pub conn: Option<Box<Connection>>,
 }
 
 impl TGStore for SqliteTGStore {
-    type GeneralResult = Result<(), Box<dyn std::error::Error>>;
+    type GeneralResult = Result<(), Box<dyn StdError>>;
     type ConnectionResult = Result<(), (Connection, Error)>;
-    // type GeneralError = Box<dyn std::error::Error>;
+    // type GeneralError = Box<dyn StdError>;
     // type ConnectionError = (Error, Connection);
     fn new() -> Self {
         SqliteTGStore {
@@ -60,7 +77,7 @@ impl TGStore for SqliteTGStore {
         }
     }
     /*
-    pub fn new(path: &PathBuf, overwrite: bool) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(path: &PathBuf, overwrite: bool) -> Result<Self, Box<dyn StdError>> {
         if &path.exists() & !overwrite {
             panic!("DB file '{:?}' already exists.", &path);
         }
@@ -69,8 +86,13 @@ impl TGStore for SqliteTGStore {
     }
     */
     fn setup(&mut self) -> Self::GeneralResult {
-        println!("SqliteTGStore::setup()");
-        Ok(())
+        match self.conn.take() {
+            None => Err(Box::new(UnknownError)),
+            Some(konn) => {
+                println!("We done did it!");
+                Ok(())
+            }
+        }
     }
 
     fn connect(&mut self) -> Self::ConnectionResult {
@@ -80,7 +102,7 @@ impl TGStore for SqliteTGStore {
         Ok(())
     }
 
-    // pub fn close(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    // pub fn close(&mut self) -> Result<(), Box<dyn StdError>> {
     // pub fn disconnect(&mut self) -> Result<(), (Connection, Error)> {
     fn disconnect(&mut self) -> Self::ConnectionResult {
         if let Some(konn) = self.conn.take() {
@@ -106,10 +128,18 @@ mod tests {
         path.push("tg-test");
         path.set_extension("db");
         let mut store = super::SqliteTGStore { path, conn: None };
-        let res = store.connect();
         match store.connect() {
             Ok(_) => assert!(true),
             Err(_) => assert!(false),
         }
+    }
+    #[test]
+    fn setup_test() -> <SqliteTGStore as TGStore>::GeneralResult {
+        let mut path = temp_dir();
+        path.push("tg-test");
+        path.set_extension("db");
+        let mut store = super::SqliteTGStore { path, conn: None };
+        store.connect();
+        store.setup()
     }
 }

@@ -13,7 +13,8 @@ pub mod sqlite3_pgsql {
         name TEXT UNIQUE NOT NULL
       );";
     
-    pub const POPULATE_PRIMITIVE_TABLE_QQ: [&'static str; 11] =
+    // pub const POPULATE_PRIMITIVE_TABLE_QQ: [&'static str; 11] =
+    pub const POPULATE_PRIMITIVE_TABLE_QQ: [&'static str; 10] =
        ["INSERT INTO primitives (name) VALUES ('integer');",
         "INSERT INTO primitives (name) VALUES ('float');",
         "INSERT INTO primitives (name) VALUES ('boolean');",
@@ -24,7 +25,7 @@ pub mod sqlite3_pgsql {
         "INSERT INTO primitives (name) VALUES ('nref');",
         "INSERT INTO primitives (name) VALUES ('rref');",
         // What is sref??
-        "INSERT INTO primitives (name) VALUES ('sref');",
+        // "INSERT INTO primitives (name) VALUES ('sref');",
         "INSERT INTO primitives (name) VALUES ('xref');"];
     
     pub const CREATE_STRING_TYPE_TABLE: &'static str =

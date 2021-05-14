@@ -1,5 +1,5 @@
 /* sql_queries.rs -- SQL queries for TinyGraph.
-   Copyright © 2020 by Caelia R. Chapin <matt@gushee.net>
+   Copyright © 2020 by Caelia R. Chapin <crc@caelia.net>
    This program is open-source software, released under the BSD license.
    See the accompanying LICENSE file for details. */
 
@@ -7,6 +7,7 @@
 // -----  DATABASE SETUP  --------------------------------------------------
 
 pub mod sqlite3_pgsql {
+    pub const NULL_PARAMS: &[&str] = &[];
     pub const CREATE_PRIMITIVE_TABLE: &'static str =
       "CREATE TABLE primitives (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,7 +97,8 @@ pub mod sqlite3_pgsql {
         class INTEGER REFERENCES type_classes(id)
       );";
     
-    pub const POPULATE_TYPES_TABLE_QQ: [&'static str; 12] =
+    // pub const POPULATE_TYPES_TABLE_QQ: [&'static str; 12] =
+    pub const POPULATE_TYPES_TABLE_QQ: [&'static str; 11] =
        ["INSERT INTO types (name, class)
          SELECT 'integer', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
@@ -115,8 +117,10 @@ pub mod sqlite3_pgsql {
          SELECT 'nref', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
          SELECT 'rref', id FROM type_classes WHERE name = 'primitive';",
+         /*
         "INSERT INTO types (name, class)
          SELECT 'sref', id FROM type_classes WHERE name = 'primitive';",
+         */
         "INSERT INTO types (name, class)
          SELECT 'xref', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
@@ -129,7 +133,8 @@ pub mod sqlite3_pgsql {
         member_type INTEGER REFERENCES types(id)
       );";
     
-    pub const POPULATE_UNION_TYPE_TABLE_QQ: [&'static str; 11] =
+    // pub const POPULATE_UNION_TYPE_TABLE_QQ: [&'static str; 11] =
+    pub const POPULATE_UNION_TYPE_TABLE_QQ: [&'static str; 10] =
        ["INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'integer';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'float';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'boolean';",
@@ -139,7 +144,9 @@ pub mod sqlite3_pgsql {
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'period';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'nref';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'rref';",
+        /*
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'sref';",
+        */
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'xref';"];
     
     pub const CREATE_STRUCT_MEMBERS_TABLE: &'static str =

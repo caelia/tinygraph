@@ -89,7 +89,32 @@ impl TGStore for SqliteTGStore {
         match self.conn.take() {
             None => Err(Box::new(UnknownError)),
             Some(konn) => {
-                println!("We done did it!");
+                konn.execute(CREATE_PRIMITIVE_TABLE, NULL_PARAMS).unwrap();
+                for q in &POPULATE_PRIMITIVE_TABLE_QQ {
+                    konn.execute(q, NULL_PARAMS).unwrap();
+                }
+                konn.execute(CREATE_STRING_TYPE_TABLE, NULL_PARAMS).unwrap();
+                konn.execute(CREATE_NUMBER_TYPE_TABLE, NULL_PARAMS).unwrap();
+                konn.execute(CREATE_VOCAB_TABLE, NULL_PARAMS).unwrap();
+                konn.execute(CREATE_CARDINALITY_TABLE, NULL_PARAMS).unwrap();
+                for q in &POPULATE_CARDINALITY_TABLE_QQ {
+                    konn.execute(q, NULL_PARAMS).unwrap();
+                }
+                konn.execute(CREATE_STRUCT_TYPE_TABLE, NULL_PARAMS).unwrap();
+                konn.execute(CREATE_TYPE_CLASS_TABLE, NULL_PARAMS).unwrap();
+                for q in &POPULATE_TYPE_CLASS_TABLE_QQ {
+                    konn.execute(q, NULL_PARAMS).unwrap();
+                }
+                konn.execute(CREATE_TYPES_TABLE, NULL_PARAMS).unwrap();
+                for q in &POPULATE_TYPES_TABLE_QQ {
+                    konn.execute(q, NULL_PARAMS).unwrap();
+                }
+                konn.execute(CREATE_UNION_TYPE_TABLE, NULL_PARAMS).unwrap();
+                for q in &POPULATE_UNION_TYPE_TABLE_QQ {
+                    konn.execute(q, NULL_PARAMS).unwrap();
+                }
+                konn.execute(CREATE_STRUCT_MEMBERS_TABLE, NULL_PARAMS).unwrap();
+                konn.execute(CREATE_STATEMENT_TABLE, NULL_PARAMS).unwrap();
                 Ok(())
             }
         }

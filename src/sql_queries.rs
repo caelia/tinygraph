@@ -3,11 +3,12 @@
    This program is open-source software, released under the BSD license.
    See the accompanying LICENSE file for details. */
 
+
 // IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 // -----  DATABASE SETUP  --------------------------------------------------
 
 pub mod sqlite3_pgsql {
-    pub const NULL_PARAMS: &[&str] = &[];
+    pub const NULL_PARAMS: &[&dyn rusqlite::types::ToSql] = &[];
     pub const CREATE_PRIMITIVE_TABLE: &'static str =
       "CREATE TABLE primitives (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

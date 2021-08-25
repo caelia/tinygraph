@@ -141,7 +141,17 @@ impl TGStore for SqliteTGStore {
     }
 }
 
-    
+
+impl SqliteTGStore {
+    pub fn from_path(path: PathBuf) -> Self {
+        SqliteTGStore {
+            path,
+            conn: None
+        }
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use std::env::temp_dir;

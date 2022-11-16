@@ -2,11 +2,11 @@
 name = "tinygraph"
 version = "0.1.0"
 authors = ["Caelia R Chapin <crc@caelia.net>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rusqlite = "0.23.1"
-sophia_jsonld = "0.5.2"
+rusqlite = "0.28"
+sophia_jsonld = "0.7"
 structopt = "0.3"

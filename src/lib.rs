@@ -1,7 +1,9 @@
 #![allow(dead_code)]
+#![allow(unused_variables)]
 
 use rusqlite::{params, Connection, Result};
 use std::path::{Path, PathBuf};
+// use std::rc::Rc;
 
 
 #[derive(Debug)]
@@ -48,12 +50,11 @@ impl<'a> Database<'a> {
         }
     }
 
+    // Should return a Result
     pub fn close(&mut self) {
-        if let Some(konn) = &self.conn {
-            // Doesn't verking!
-            if let Ok(_) = &konn.close() {
-                self.conn = None
-            }
+        let conn = self.conn.take();
+        if let Some(konn) = conn {
+            konn.close();
         }
     }
 }

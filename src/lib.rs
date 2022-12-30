@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 
 pub mod cli;
+pub mod query;
 
 use rusqlite::{params, Connection};
 use rusqlite::Result as RsqResult;
@@ -10,6 +11,7 @@ use rusqlite::Error as RsqError;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
+// use query::*;
 // use std::rc::Rc;
 
 #[derive(Debug)]
@@ -24,6 +26,15 @@ impl fmt::Display for TinyGraphError {
 }
 
 impl Error for TinyGraphError {}
+
+impl TinyGraphError {
+    fn new(desc: String) -> Self {
+        TinyGraphError { desc }
+    }
+    fn default() -> Self {
+        TinyGraphError { desc: String::from("Ruh-roh!") }
+    }
+}
 
 
 #[derive(Debug)]
@@ -63,31 +74,6 @@ pub struct Database<'a> {
     options: Vec<DbOptions>,
 }
 
-const Q_CREATE_REL_TABLE: &str = "
-    CREATE TABLE relations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        relname TEXT NOT NULL,
-        bidi INTEGER,
-        inverse TEXT
-    );
-";
-
-const Q_CREATE_TYPE_TABLE: &str = "
-    CREATE TABLE types (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        typename TEXT NOT NULL
-    );
-";
-
-const Q_CREATE_DATA_TABLE: &str = "
-    CREATE TABLE data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        node_id INTEGER,
-        relation REFERENCES relations(id) NOT NULL,
-        type REFERENCE types(id) NOT NULL,
-        value TEXT NOT NULL
-    );
-";
 
 impl<'a> Database<'a> {
     // pub fn new(path: &'a Path, name: Option<String>, init: bool,
@@ -125,7 +111,36 @@ impl<'a> Database<'a> {
         Ok(())
     }
     
-    // fn setup
+    fn setup(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let err_msg : String;
+        match &self.conn {
+            Some(konn) => {
+                if let Err(_) = konn.execute(query::CREATE_REL_TABLE, ()) {
+                    err_msg = "Database setup failed on relation table creation query.".to_string();
+                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                }
+                if let Err(_) = konn.execute(query::CREATE_TYPE_TABLE, ()) {
+                    err_msg = "Database setup failed on type table creation query.".to_string();
+                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                }
+                if let Err(_) = konn.execute(query::CREATE_DATA_TABLE, ()) {
+                    err_msg = "Database setup failed on data table creation query.".to_string();
+                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                }
+                for insert_stmt in query::POPULATE_TYPE_TABLE {
+                    if let Err(_) = konn.execute(insert_stmt, ()) {
+                        err_msg = "Database setup failed attempting to populate type table.".to_string();
+                        return Err(Box::new(TinyGraphError::new(err_msg)));
+                    }
+                }
+                Ok(())
+            },
+            None => {
+                err_msg = "Database setup failed - no connection.".to_string();
+                Err(Box::new(TinyGraphError::new(err_msg)))
+            }
+        }
+    }
 
     pub fn open(&mut self) {
         if let Ok(konn) = Connection::open(self.path) {

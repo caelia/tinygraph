@@ -4,7 +4,9 @@
 
 pub mod cli;
 
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection};
+use rusqlite::Result as RsqResult;
+use rusqlite::Error as RsqError;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
@@ -48,29 +50,60 @@ struct Edge {
 }
 
 #[derive(Debug)]
-enum DbOptions {
+pub enum DbOptions {
     Read,
     Write,
 }
 
 #[derive(Debug)]
 pub struct Database<'a> {
-    path: &'a Path,
+    // path: &'a Path,
+    path: &'a PathBuf,
     conn: Option<Connection>,
     options: Vec<DbOptions>,
 }
 
+const Q_CREATE_REL_TABLE: &str = "
+    CREATE TABLE relations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        relname TEXT NOT NULL,
+        bidi INTEGER,
+        inverse TEXT
+    );
+";
+
+const Q_CREATE_TYPE_TABLE: &str = "
+    CREATE TABLE types (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        typename TEXT NOT NULL
+    );
+";
+
+const Q_CREATE_DATA_TABLE: &str = "
+    CREATE TABLE data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        node_id INTEGER,
+        relation REFERENCES relations(id) NOT NULL,
+        type REFERENCE types(id) NOT NULL,
+        value TEXT NOT NULL
+    );
+";
+
 impl<'a> Database<'a> {
-    pub fn new(path: &'a Path, name: Option<String>, init: bool,
+    // pub fn new(path: &'a Path, name: Option<String>, init: bool,
+    pub fn new(path: &'a PathBuf, name: Option<String>, init: bool,
             overwrite: bool, create_path: bool, options: Vec<DbOptions>)
             -> Result<Self, Box<dyn std::error::Error>> {
         let filename = match name {
-            Some(fname) => Path::new(&fname),
-            None => Path::new("tgr_data.db"),
+            // Some(fname) => Path::new(&fname),
+            Some(fname) => PathBuf::from(&fname),
+            // None => Path::new("tgr_data.db"),
+            None => PathBuf::from("tgr_data.db"),
         };
         let full_path = path.join(filename);
         let ok = if init {
-            match Self::initialize(full_path, overwrite).unwrap() {
+            // match Self::initialize(&full_path, overwrite) {
+            match Self::initialize(full_path.clone(), overwrite) {
                 Ok(_) => true,
                 Err(_) => false,
             }
@@ -84,12 +117,15 @@ impl<'a> Database<'a> {
         }
     }
     
-    fn initialize(path: &'a Path, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
+    // fn initialize(path: &'a Path, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
+    fn initialize(path: PathBuf, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
         if &path.exists() & !overwrite {
             panic!("DB file '{:?}' already exists.", &path);
         }
         Ok(())
     }
+    
+    // fn setup
 
     pub fn open(&mut self) {
         if let Ok(konn) = Connection::open(self.path) {
@@ -101,10 +137,12 @@ impl<'a> Database<'a> {
     }
 
     // Should return a Result
-    pub fn close(&mut self) {
+    pub fn close(&mut self) -> RsqResult<(), (Connection, RsqError)> {
         let conn = self.conn.take();
         if let Some(konn) = conn {
-            konn.close();
+            konn.close()
+        } else {
+            Ok(())
         }
     }
 }

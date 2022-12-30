@@ -9,4 +9,4 @@ edition = "2021"
 [dependencies]
 rusqlite = "0.28"
 sophia_jsonld = "0.7"
-structopt = "0.3"
+clap = { version = "4.0", features = ["derive"] }

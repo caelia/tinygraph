@@ -1,15 +1,15 @@
-use structopt::StructOpt;
+use clap::{Parser, Subcommand};
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 // #[structopt(name = "basic")]
 pub struct Tgm {
-    #[structopt(long, short)]
+    #[arg(long, short)]
     path: Option<String>,
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     cmd: Command,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Subcommand, Debug)]
 pub enum Command {
     Init,
 }

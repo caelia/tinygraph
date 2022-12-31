@@ -11,7 +11,6 @@ use rusqlite::Error as RsqError;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
-// use query::*;
 // use std::rc::Rc;
 
 #[derive(Debug)]
@@ -37,8 +36,8 @@ impl TinyGraphError {
 }
 
 macro_rules! tg_error {
-    ($message:expr) => {
-        Err(Box::new(TinyGraphError::new(format!($message))))   
+    ($($args:tt)*) => {
+        Err(Box::new(TinyGraphError::new(format!($($args)*))))   
     }
 }
 
@@ -112,7 +111,7 @@ impl<'a> Database<'a> {
     // fn initialize(path: &'a Path, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
     fn initialize(path: PathBuf, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
         if &path.exists() & !overwrite {
-            panic!("DB file '{:?}' already exists.", &path);
+            return tg_error!("DB file '{:?}' already exists.", &path);
         }
         Ok(())
     }

@@ -130,8 +130,9 @@ impl<'a> Database<'a> {
                 if let Err(_) = konn.execute(query::CREATE_DATA_TABLE, ()) {
                     return tg_error!("Database setup failed on data table creation query.");
                 }
-                for insert_stmt in query::POPULATE_TYPE_TABLE {
-                    if let Err(_) = konn.execute(insert_stmt, ()) {
+                for typename in ["int", "float", "bool", "datetime",
+                                 "string", "iref", "lref", "rref"] {
+                    if let Err(_) = konn.execute(query::POPULATE_TYPE_TABLE, [typename]) {
                         return tg_error!("Database setup failed attempting to populate type table.");
                     }
                 }

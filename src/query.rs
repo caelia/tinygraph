@@ -24,13 +24,4 @@ pub const CREATE_DATA_TABLE: &str = "
     );
 ";
 
-pub const POPULATE_TYPE_TABLE: [&str; 8] = [
-    "INSERT INTO types (typename) VALUES ('int');",
-    "INSERT INTO types (typename) VALUES ('float');",
-    "INSERT INTO types (typename) VALUES ('bool');",
-    "INSERT INTO types (typename) VALUES ('string');",
-    "INSERT INTO types (typename) VALUES ('datetime');",
-    "INSERT INTO types (typename) VALUES ('iref');",
-    "INSERT INTO types (typename) VALUES ('lref');",
-    "INSERT INTO types (typename) VALUES ('rref');"
-];
+pub const POPULATE_TYPE_TABLE: &str = "INSERT INTO types (typename) VALUES ('?');";

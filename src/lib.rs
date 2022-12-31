@@ -36,6 +36,12 @@ impl TinyGraphError {
     }
 }
 
+macro_rules! tg_error {
+    ($message:expr) => {
+        Err(Box::new(TinyGraphError::new(format!($message))))   
+    }
+}
+
 
 #[derive(Debug)]
 enum LiteralType {
@@ -99,7 +105,7 @@ impl<'a> Database<'a> {
         if ok {
             Ok(Database { path: &path, conn: None, options })
         } else {
-            Err(Box::new(TinyGraphError { desc: String::from("Unable to create database!")}))
+            tg_error!("Unable to create database!")
         }
     }
     
@@ -116,28 +122,23 @@ impl<'a> Database<'a> {
         match &self.conn {
             Some(konn) => {
                 if let Err(_) = konn.execute(query::CREATE_REL_TABLE, ()) {
-                    err_msg = "Database setup failed on relation table creation query.".to_string();
-                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                    return tg_error!("Database setup failed on relation table creation query.");
                 }
                 if let Err(_) = konn.execute(query::CREATE_TYPE_TABLE, ()) {
-                    err_msg = "Database setup failed on type table creation query.".to_string();
-                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                    return tg_error!("Database setup failed on type table creation query.");
                 }
                 if let Err(_) = konn.execute(query::CREATE_DATA_TABLE, ()) {
-                    err_msg = "Database setup failed on data table creation query.".to_string();
-                    return Err(Box::new(TinyGraphError::new(err_msg)));
+                    return tg_error!("Database setup failed on data table creation query.");
                 }
                 for insert_stmt in query::POPULATE_TYPE_TABLE {
                     if let Err(_) = konn.execute(insert_stmt, ()) {
-                        err_msg = "Database setup failed attempting to populate type table.".to_string();
-                        return Err(Box::new(TinyGraphError::new(err_msg)));
+                        return tg_error!("Database setup failed attempting to populate type table.");
                     }
                 }
                 Ok(())
             },
             None => {
-                err_msg = "Database setup failed - no connection.".to_string();
-                Err(Box::new(TinyGraphError::new(err_msg)))
+                tg_error!("Database setup failed - no connection.")
             }
         }
     }

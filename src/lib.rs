@@ -11,7 +11,6 @@ use rusqlite::Error as RsqError;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
-// use std::rc::Rc;
 
 #[derive(Debug)]
 struct TinyGraphError {
@@ -73,7 +72,6 @@ pub enum DbOptions {
 
 #[derive(Debug)]
 pub struct Database<'a> {
-    // path: &'a Path,
     path: &'a PathBuf,
     conn: Option<Connection>,
     options: Vec<DbOptions>,
@@ -81,19 +79,15 @@ pub struct Database<'a> {
 
 
 impl<'a> Database<'a> {
-    // pub fn new(path: &'a Path, name: Option<String>, init: bool,
     pub fn new(path: &'a PathBuf, name: Option<String>, init: bool,
             overwrite: bool, create_path: bool, options: Vec<DbOptions>)
             -> Result<Self, Box<dyn std::error::Error>> {
         let filename = match name {
-            // Some(fname) => Path::new(&fname),
             Some(fname) => PathBuf::from(&fname),
-            // None => Path::new("tgr_data.db"),
             None => PathBuf::from("tgr_data.db"),
         };
         let full_path = path.join(filename);
         let ok = if init {
-            // match Self::initialize(&full_path, overwrite) {
             match Self::initialize(full_path.clone(), overwrite) {
                 Ok(_) => true,
                 Err(_) => false,
@@ -108,7 +102,6 @@ impl<'a> Database<'a> {
         }
     }
     
-    // fn initialize(path: &'a Path, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
     fn initialize(path: PathBuf, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
         if &path.exists() & !overwrite {
             return tg_error!("DB file '{:?}' already exists.", &path);
@@ -152,7 +145,6 @@ impl<'a> Database<'a> {
     pub fn connect(&mut self) {
     }
 
-    // Should return a Result
     pub fn close(&mut self) -> RsqResult<(), (Connection, RsqError)> {
         let conn = self.conn.take();
         if let Some(konn) = conn {

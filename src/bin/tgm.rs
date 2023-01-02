@@ -8,10 +8,13 @@ use clap::Parser;
 
 fn main() {
     let tgm = Tgm::parse();
-    /*
-    if let (path, cmd): (Option<String>, Command) = tgm {
-        Tgm { path. cmd }
+    match tgm.cmd {
+        Command::Init => {
+            match tgm.path {
+                Some(p) => println!("Create Tinygraph DB at {}.", p),
+                None => println!("Create Tinygraph DB in current directory.")
+            }
+        },
+        _ => panic!("Unknown command - this should never happen.")
     }
-    >*/
-    println!("TGM: {:?}", tgm );
 }

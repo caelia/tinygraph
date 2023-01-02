@@ -1,12 +1,11 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-// #[structopt(name = "basic")]
 pub struct Tgm {
     #[arg(long, short)]
-    path: Option<String>,
+    pub path: Option<String>,
     #[command(subcommand)]
-    cmd: Command,
+    pub cmd: Command,
 }
 
 #[derive(Subcommand, Debug)]

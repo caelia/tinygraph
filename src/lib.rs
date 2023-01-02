@@ -8,6 +8,7 @@ pub mod query;
 use rusqlite::{params, Connection};
 use rusqlite::Result as RsqResult;
 use rusqlite::Error as RsqError;
+use rusqlite::OpenFlags as RsqOpenFlags;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
@@ -87,26 +88,39 @@ impl<'a> Database<'a> {
             None => PathBuf::from("tgr_data.db"),
         };
         let full_path = path.join(filename);
-        let ok = if init {
+        let conn = if init {
             match Self::initialize(full_path.clone(), overwrite) {
-                Ok(_) => true,
-                Err(_) => false,
+                Ok(konn) => Some(konn),
+                Err(_) => return tg_error!("No database connection.")
             }
         } else {
-            false
+            None
         };
-        if ok {
-            Ok(Database { path: &path, conn: None, options })
-        } else {
-            tg_error!("Unable to create database!")
+        match conn {
+            Some(_) => Ok(Database { path: &path, conn, options }),
+            None => tg_error!("Unable to create database object!")
         }
     }
     
-    fn initialize(path: PathBuf, overwrite: bool) -> Result<(), Box<dyn std::error::Error>> {
-        if &path.exists() & !overwrite {
-            return tg_error!("DB file '{:?}' already exists.", &path);
+    fn initialize(path: PathBuf, overwrite: bool) -> Result<Connection, Box<dyn std::error::Error>> {
+        if path.exists() {
+            if overwrite {
+                match std::fs::remove_file(&path) {
+                    Ok(_) => (),
+                    Err(_) => {
+                        return tg_error!("Unable to remove existing database.");
+                    }
+                }
+            } else {
+                return tg_error!("Database '{:?}' already exists.", &path);
+            }
         }
-        Ok(())
+        match Connection::open_with_flags(path, RsqOpenFlags::SQLITE_OPEN_CREATE) {
+            Ok(conn) => Ok(conn),
+            Err(_) => {
+                tg_error!("Unable to create SQLite database.")
+            }
+        }
     }
     
     fn setup(&mut self) -> Result<(), Box<dyn std::error::Error>> {

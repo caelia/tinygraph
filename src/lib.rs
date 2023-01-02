@@ -4,6 +4,9 @@
 
 pub mod cli;
 pub mod query;
+pub mod app;
+pub mod tgconfig;
+pub mod error;
 
 use rusqlite::{params, Connection};
 use rusqlite::Result as RsqResult;
@@ -12,35 +15,7 @@ use rusqlite::OpenFlags as RsqOpenFlags;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
-
-#[derive(Debug)]
-struct TinyGraphError {
-    desc: String,
-}
-
-impl fmt::Display for TinyGraphError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "TinyGraph Error!!!!!!!!!!!!!!!!")
-    }
-}
-
-impl Error for TinyGraphError {}
-
-impl TinyGraphError {
-    fn new(desc: String) -> Self {
-        TinyGraphError { desc }
-    }
-    fn default() -> Self {
-        TinyGraphError { desc: String::from("Ruh-roh!") }
-    }
-}
-
-macro_rules! tg_error {
-    ($($args:tt)*) => {
-        Err(Box::new(TinyGraphError::new(format!($($args)*))))   
-    }
-}
-
+use error::*;
 
 #[derive(Debug)]
 enum LiteralType {
@@ -88,18 +63,30 @@ impl<'a> Database<'a> {
             None => PathBuf::from("tgr_data.db"),
         };
         let full_path = path.join(filename);
-        let conn = if init {
-            match Self::initialize(full_path.clone(), overwrite) {
-                Ok(konn) => Some(konn),
+        let db = if init {
+            let mut db_ = match Self::initialize(full_path.clone(), overwrite) {
+                Ok(konn) => {
+                    Database {
+                        conn: Some(konn),
+                        path,
+                        options
+                    }
+                },
                 Err(_) => return tg_error!("No database connection.")
+            };
+            match db_.setup() {
+                Ok(_) => db_,
+                Err(e) => return tg_error!("{:?}", e)
             }
         } else {
-            None
+            match Connection::open(path) {
+                Ok(konn) => {
+                    Database { conn: Some(konn), path, options }
+                },
+                Err(_) => return tg_error!("Unable to connect to SQLite db.")
+            }
         };
-        match conn {
-            Some(_) => Ok(Database { path: &path, conn, options }),
-            None => tg_error!("Unable to create database object!")
-        }
+        Ok(db)
     }
     
     fn initialize(path: PathBuf, overwrite: bool) -> Result<Connection, Box<dyn std::error::Error>> {
@@ -159,12 +146,16 @@ impl<'a> Database<'a> {
     pub fn connect(&mut self) {
     }
 
-    pub fn close(&mut self) -> RsqResult<(), (Connection, RsqError)> {
+    // pub fn close(&mut self) -> RsqResult<(), (Connection, RsqError)> {
+    pub fn close(&mut self) -> RsqResult<(), Box<dyn std::error::Error>> {
         let conn = self.conn.take();
         if let Some(konn) = conn {
-            konn.close()
+            match konn.close() {
+                Ok(_) => Ok(()),
+                Err((_, e)) => Err(Box::new(e))
+            }
         } else {
-            Ok(())
+            tg_error!("Attempted to close a nonexistent connection. This should never happen.")
         }
     }
 }

@@ -4,6 +4,7 @@
 use std::path::PathBuf;
 use tinygraph::Database;
 use tinygraph::cli::{Tgm, Args, Action};
+use tinygraph::sqlite::database::SqliteDatabase;
 use clap::Parser;
 
 fn main() {
@@ -55,7 +56,7 @@ fn main() {
                     Err(e) => panic!("{:?}", e),
                 }
             }
-            let _ = Database::new(&full_path, None, true, args.replace, false, vec![]);
+            let _ = SqliteDatabase::new(None, true, args.replace, vec![]);
         },
         Action::Query => println!("OK, let's do a query!")
     }

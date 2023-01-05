@@ -221,8 +221,13 @@ impl SqliteDatabase {
                 if let Err(e) = konn.execute(sql::CREATE_DATA_TABLE, ()) {
                     return tg_error!("Database setup failed on data table creation query.\n{:?}", e);
                 }
-                for typename in ["int", "float", "bool", "datetime",
-                                 "string", "iref", "lref", "rref"] {
+                // Typenames include 4 types of references:
+                // nref [node reference] - references a node in the same db
+                // rref [reifying reference] - references an edge in the same db
+                // xref [cross-reference] - references an item in another local db
+                // uref [uri reference] - flexible, but mainly for referring to remote dbs
+                for typename in ["int", "float", "bool", "datetime", "string",
+                                 "nref", "rref", "xref", "uref"] {
                     if let Err(e) = konn.execute(sql::POPULATE_TYPE_TABLE, [typename]) {
                         return tg_error!("Database setup failed attempting to populate type table.\n{:?}", e);
                     }

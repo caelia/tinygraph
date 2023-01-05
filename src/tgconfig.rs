@@ -10,7 +10,10 @@ impl Config {
         Config { data: HashMap::new() }
     }
     pub fn get(&self, key: String) -> Option<String> {
-        Some(String::from(":XXX:"))
+        match self.data.get(&key) {
+            Some(v) => Some(v.clone()),
+            None => None
+        }
     }
     pub fn set(&mut self, key: String, value: String) {
         let _ = self.data.insert(key, value);

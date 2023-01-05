@@ -17,11 +17,11 @@ pub const CREATE_TYPE_TABLE: &str = "
 pub const CREATE_DATA_TABLE: &str = "
     CREATE TABLE data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        node_id INTEGER,
+        node_id INTEGER NOT NULL,
         relation REFERENCES relations(id) NOT NULL,
-        type REFERENCE types(id) NOT NULL,
+        type REFERENCES types(id) NOT NULL,
         value TEXT NOT NULL
     );
 ";
 
-pub const POPULATE_TYPE_TABLE: &str = "INSERT INTO types (typename) VALUES ('?');";
+pub const POPULATE_TYPE_TABLE: &str = "INSERT INTO types (typename) VALUES (?);";

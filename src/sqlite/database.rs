@@ -129,7 +129,9 @@ impl Database for SqliteDatabase {
                         options: opts.data.clone()
                     }
                 },
-                Err(_) => return tg_error!("No database connection.")
+                Err(e) => {
+                    return tg_error!("No database connection.\n{:?}", e);
+                }
             };
             match db_.setup() {
                 Ok(_) => db_,
@@ -196,10 +198,12 @@ impl SqliteDatabase {
                 return tg_error!("Database '{:?}' already exists.", &path);
             }
         }
-        match Connection::open_with_flags(path, RsqOpenFlags::SQLITE_OPEN_CREATE) {
+        match Connection::open_with_flags(path,
+                RsqOpenFlags::SQLITE_OPEN_READ_WRITE
+                |RsqOpenFlags::SQLITE_OPEN_CREATE) {
             Ok(conn) => Ok(conn),
-            Err(_) => {
-                tg_error!("Unable to create SQLite database.")
+            Err(e) => {
+                tg_error!("Unable to create SQLite database.\n{:?}", e)
             }
         }
     }
@@ -208,19 +212,19 @@ impl SqliteDatabase {
         let err_msg : String;
         match &self.conn {
             Some(konn) => {
-                if let Err(_) = konn.execute(sql::CREATE_REL_TABLE, ()) {
-                    return tg_error!("Database setup failed on relation table creation query.");
+                if let Err(e) = konn.execute(sql::CREATE_REL_TABLE, ()) {
+                    return tg_error!("Database setup failed on relation table creation query.\n{:?}", e);
                 }
-                if let Err(_) = konn.execute(sql::CREATE_TYPE_TABLE, ()) {
-                    return tg_error!("Database setup failed on type table creation query.");
+                if let Err(e) = konn.execute(sql::CREATE_TYPE_TABLE, ()) {
+                    return tg_error!("Database setup failed on type table creation query.\n{:?}", e);
                 }
-                if let Err(_) = konn.execute(sql::CREATE_DATA_TABLE, ()) {
-                    return tg_error!("Database setup failed on data table creation query.");
+                if let Err(e) = konn.execute(sql::CREATE_DATA_TABLE, ()) {
+                    return tg_error!("Database setup failed on data table creation query.\n{:?}", e);
                 }
                 for typename in ["int", "float", "bool", "datetime",
                                  "string", "iref", "lref", "rref"] {
-                    if let Err(_) = konn.execute(sql::POPULATE_TYPE_TABLE, [typename]) {
-                        return tg_error!("Database setup failed attempting to populate type table.");
+                    if let Err(e) = konn.execute(sql::POPULATE_TYPE_TABLE, [typename]) {
+                        return tg_error!("Database setup failed attempting to populate type table.\n{:?}", e);
                     }
                 }
                 Ok(())

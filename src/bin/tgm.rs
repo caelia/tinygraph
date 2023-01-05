@@ -70,8 +70,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Err(e) => panic!("{:?}", e),
                 }
             }
-            let _ = SqliteDatabase::new(None, true, args.replace, vec![]);
-            Ok(())
+            let opts = match parent_dir.to_str() {
+                Some(str) => vec![("path".to_string(), str.to_string())],
+                None => return tg_error!("Can't convert path to string: '{:?}", parent_dir),
+            };
+            match SqliteDatabase::new(None, true, args.replace, opts) {
+                Ok(_) => {
+                    println!("Database created.");
+                    Ok(())
+                },
+                Err(e) => tg_error!("{:?}", e)
+            }
         },
         Action::Query => {
             println!("OK, let's do a query!");

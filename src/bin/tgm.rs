@@ -2,12 +2,15 @@
 #![allow(unused_imports)]
 
 use std::path::PathBuf;
+use tinygraph::tg_error;
+use tinygraph::error::TinyGraphError;
 use tinygraph::Database;
 use tinygraph::cli::{Tgm, Args, Action};
+use tinygraph::app::App;
 use tinygraph::sqlite::database::SqliteDatabase;
 use clap::Parser;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let tgm = Tgm::new();
     match args.action {
@@ -17,7 +20,12 @@ fn main() {
                     let path = PathBuf::from(p);
                     let dbname = match args.name {
                         Some(name) => name,
-                        None => tgm.base.default_name(),
+                        None => {
+                            match tgm.default_name() {
+                                Ok(name) => name,
+                                Err(e) => return tg_error!("{:?}", e),
+                            }
+                        }
                     };
                     let fp = path.join(dbname);
                     match (fp.exists(), args.replace) {
@@ -34,18 +42,24 @@ fn main() {
                     }
                 }
                 None => {
-                    let path = match tgm.base.default_dir() {
-                        Some(p) => PathBuf::from(p),
-                        None => {
+                    let path = match tgm.default_dir() {
+                        Ok(Some(p)) => p,
+                        Ok(None) => {
                             match std::env::current_dir() {
                                 Ok(dir) => dir,
-                                Err(_) => panic!("Can't obtain current directory."),
+                                Err(_) => return tg_error!("Can't obtain current directory."),
                             }
-                        }
+                        },
+                        Err(e) => return tg_error!("{:?}", e)
                     };
                     match args.name {
                         Some(name) => path.join(name),
-                        None => path.join(tgm.base.default_name()),
+                        None => {
+                            match tgm.default_name() {
+                                Ok(name) => path.join(name),
+                                Err(e) => return tg_error!("{:?}", e)
+                            }
+                        }
                     }
                 }
             };
@@ -57,7 +71,11 @@ fn main() {
                 }
             }
             let _ = SqliteDatabase::new(None, true, args.replace, vec![]);
+            Ok(())
         },
-        Action::Query => println!("OK, let's do a query!")
+        Action::Query => {
+            println!("OK, let's do a query!");
+            Ok(())
+        }
     }
 }

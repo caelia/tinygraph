@@ -8,6 +8,10 @@ use std::path::PathBuf;
 pub struct Args {
     #[arg(long, short)]
     pub path: Option<String>,
+    #[arg(long, short)]
+    pub name: Option<String>,
+    #[arg(long, short)]
+    pub replace: bool,
     #[command(subcommand)]
     pub action: Action,
 }
@@ -19,7 +23,7 @@ pub enum Action {
 }
 
 pub struct Tgm {
-    base: App
+    pub base: App
 }
 
 impl Tgm {

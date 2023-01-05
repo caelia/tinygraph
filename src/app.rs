@@ -20,4 +20,11 @@ impl App {
             None => None
         }
     }
+    pub fn default_name(&self) -> String {
+        let k = String::from("default_name");
+        match self.config.data.get(&k) {
+            Some(name) => name.to_string(),
+            None => "tg_data.db".to_string(),
+        }
+    }
 }

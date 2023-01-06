@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fmt;
 use std::collections::HashMap;
+use std::fs::create_dir_all;
 use crate::sqlite::sql;
 use crate::error::*;
 use crate::tgconfig;
@@ -96,32 +97,14 @@ pub struct SqliteDatabase {
 // impl<'a> Database<'a> {
 // impl<DBO: DbOptions> Database<DBO: DbOptions> for SqliteDatabase {
 impl Database for SqliteDatabase {
-    fn new(name: Option<String>, init: bool, replace: bool,
+    fn new(dir: PathBuf, fname: String, init: bool, replace: bool,
            options: Vec<(String, String)>)
             -> Result<Self, Box<dyn std::error::Error>> {
-        let config = tgconfig::Config::new();
-        let subdir = match name {
-            Some(ref dname) => dname.clone(),
-            None => "tinygraph_db".to_string(),
-        };
+        // let config = tgconfig::Config::new();
         let opts = SqliteDbOptions::new(options);
-        let dir = match opts.get("path".to_string()) {
-            Ok(Some(path_)) => PathBuf::from(path_),
-            Ok(None) => {
-                match config.get("sqlite_default_directory".to_string()) {
-                    Some(dir_) => PathBuf::from(dir_),
-                    None => return tg_error!("No directory for Sqlite database."),
-                }
-            },
-            Err(e) => return tg_error!("{:?}", e),
-        };
-        let filename = match name {
-            Some(fname) => PathBuf::from(&fname),
-            None => PathBuf::from("tgr_data.db"),
-        };
-        let full_path = dir.join(filename);
+        let full_path = dir.join(&fname);
         let db = if init {
-            let mut db_ = match Self::initialize(full_path.clone(), replace) {
+            let mut db_ = match Self::initialize(dir.clone(), fname.clone(), replace) {
                 Ok(konn) => {
                     SqliteDatabase {
                         conn: Some(konn),
@@ -185,20 +168,26 @@ impl Database for SqliteDatabase {
 }
 
 impl SqliteDatabase {
-  fn initialize(path: PathBuf, replace: bool) -> Result<Connection, Box<dyn std::error::Error>> {
-        if path.exists() {
+  fn initialize(dir: PathBuf, fname: String,  replace: bool) -> Result<Connection, Box<dyn std::error::Error>> {
+        let full_path = dir.join(fname);
+        if full_path.exists() {
             if replace {
-                match std::fs::remove_file(&path) {
+                match std::fs::remove_file(&full_path) {
                     Ok(_) => (),
                     Err(_) => {
                         return tg_error!("Unable to remove existing database.");
                     }
                 }
             } else {
-                return tg_error!("Database '{:?}' already exists.", &path);
+                return tg_error!("Database '{:?}' already exists.", &full_path);
+            }
+        } else if !dir.exists() {
+            match create_dir_all(dir) {
+                Ok(_) => (),
+                Err(e) => return tg_error!("Can't create database directory. {:?}", e),
             }
         }
-        match Connection::open_with_flags(path,
+        match Connection::open_with_flags(full_path,
                 RsqOpenFlags::SQLITE_OPEN_READ_WRITE
                 |RsqOpenFlags::SQLITE_OPEN_CREATE) {
             Ok(conn) => Ok(conn),

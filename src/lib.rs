@@ -52,7 +52,7 @@ pub trait DbOptions<T> {
 */
 
 pub trait Database {
-    fn new(name: Option<String>, init: bool, replace: bool, 
+    fn new(dir: PathBuf, filename: String, init: bool, replace: bool, 
            options: Vec<(String, String)>)
            -> Result<Self, Box<dyn std::error::Error>> where Self: Sized;
     fn open(&mut self) -> Result<(), Box<dyn std::error::Error>>;

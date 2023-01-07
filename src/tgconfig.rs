@@ -1,21 +1,11 @@
 use std::path::PathBuf;
 use std::collections::HashMap;
 
-pub struct Config {
-    pub data: HashMap<String, String>,
-}
+pub trait Config: Default {
+    type KeyType;
+    type ValueType;
 
-impl Config {
-    pub fn new() -> Self {
-        Config { data: HashMap::new() }
-    }
-    pub fn get(&self, key: String) -> Option<String> {
-        match self.data.get(&key) {
-            Some(v) => Some(v.clone()),
-            None => None
-        }
-    }
-    pub fn set(&mut self, key: String, value: String) {
-        let _ = self.data.insert(key, value);
-    }
+    fn new() -> Self;
+    fn get(&self, key: Self::KeyType) -> Result<Option<&Self::ValueType>, Box<dyn std::error::Error>>;
+    fn set(&mut self, key: Self::KeyType, value: Self::ValueType) -> Result<(), Box<dyn std::error::Error>>;
 }

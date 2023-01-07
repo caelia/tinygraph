@@ -5,14 +5,14 @@ use std::path::PathBuf;
 use tinygraph::tg_error;
 use tinygraph::error::TinyGraphError;
 use tinygraph::Database;
-use tinygraph::cli::{Tgm, Args, Action};
+use tinygraph::cli::{Tgm, TgmConfig, Args, Action};
 use tinygraph::app::App;
 use tinygraph::sqlite::database::SqliteDatabase;
 use clap::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let tgm = Tgm::new();
+    let tgm = Tgm::new(TgmConfig::default());
     match args.action {
         Action::Init => {
             let full_path = match args.path {

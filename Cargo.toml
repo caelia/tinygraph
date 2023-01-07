@@ -10,6 +10,8 @@ edition = "2021"
 rusqlite = { version = "0.28", optional = true }
 sophia_jsonld = "0.7"
 clap = { version = "4.0", features = ["derive"] }
+toml = "0.5"
+directories = "4.0"
 
 [features]
 default = ["sqlite"]

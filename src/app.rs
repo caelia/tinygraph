@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::env::current_dir;
 
 pub trait App {
-    fn new() -> Self;
+    fn new(config: Config) -> Self;
     fn default_dir(&self) -> Result<Option<PathBuf>, Box<dyn std::error::Error>> {
         let k = String::from("default_path");
         match self.config_get(k) {

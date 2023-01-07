@@ -26,12 +26,12 @@ pub enum Action {
 }
 
 pub struct Tgm {
-    pub config: Config,
+    config: Config,
 }
 
 impl App for Tgm {
-    fn new() -> Self {
-        Tgm { config: Config::new() }
+    fn new(config: Config) -> Self {
+        Tgm { config }
     }
     fn default_dir(&self) -> Result<Option<PathBuf>, Box<dyn std::error::Error>> {
         match self.config_get("default_directory".to_string()) {

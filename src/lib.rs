@@ -1,10 +1,18 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+mod sql_queries;
+mod tg_data;
+mod tg_query;
+
 use rusqlite::{params, Connection, Result, Error};
+
 use std::path::{Path, PathBuf};
 use std::error::Error as StdError;
 use std::fmt;
+
+use crate::sql_queries::sqlite3_pgsql::*;
+
 
 #[derive(Debug,Clone)]
 struct UnknownError;
@@ -20,9 +28,6 @@ impl fmt::Display for UnknownError {
         write!(f, "Unknown error!")
     }
 }
-
-mod sql_queries;
-use crate::sql_queries::sqlite3_pgsql::*;
 
 pub trait TGStore {
     type GeneralResult;
@@ -174,7 +179,7 @@ mod tests {
         path.push("tg-test");
         path.set_extension("db");
         let mut store = super::SqliteTGStore { path, conn: None };
-        store.connect();
+        store.connect()?;
         store.setup()
     }
 }

@@ -1,12 +1,14 @@
-pub enum DataType (
-    INTEGER,
-    FLOAT,
-    BOOLEAN,
-    STRING,
-    DATE,
-    TIME,
-    PERIOD,
-    )
+#[derive(Debug, Clone)]
+pub enum DataType {
+    Integer,
+    Float,
+    Boolean,
+    String,
+    Date,
+    Time,
+    Duration,
+    Uri,
+}
 
 // pub enum ResourceType (NODE, EDGE, LITERAL);
 
@@ -25,11 +27,12 @@ pub enum ResourceSpec (
     )
 */
 
-pub enum ResourceSpec (
-    NODE(u32),
-    EDGE(u32),
-    LITERAL(DataType, String),
-)
+#[derive(Debug, Clone)]
+pub enum ResourceSpec {
+    Node(u32),
+    Edge(u32),
+    Literal(DataType, String),
+}
 
 /*
 struct ResourceSpec {
@@ -38,4 +41,5 @@ struct ResourceSpec {
 }
 */
 
-struct TGData {};
+#[derive(Debug, Clone)]
+pub struct TGData {}

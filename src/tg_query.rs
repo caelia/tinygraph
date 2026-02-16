@@ -1,14 +1,19 @@
-pub mod tg_data;
-use tg_data::*;
+use crate::tg_data::*;
 
 // pub trait TGQuery 
 
-pub enum QueryOp (CREATE, RETRIEVE, UPDATE, DELETE);
+#[derive(Debug, Clone)]
+pub enum QueryOp {
+    Create,
+    Retrieve,
+    Update,
+    Delete
+}
 
 pub trait TGQuery {
-    fn operation(&self) -> QueryOp;
-    fn target(&self) -> ResourceSpec;
-    fn content(&self) -> Option<TGData>;
+    fn operation(&self) -> &QueryOp;
+    fn target(&self) -> &ResourceSpec;
+    fn content(&self) -> &Option<TGData>;
 }
 
 pub struct CompoundQuery {
@@ -17,21 +22,21 @@ pub struct CompoundQuery {
     content: Option<TGData>, 
 }
 
-pub impl CompoundQuery {
-    pub fn new(operation: QueryOp, target: RetrievalSpec, content: Option<TGData>) -> Self {
+impl CompoundQuery {
+    pub fn new(operation: QueryOp, target: ResourceSpec, content: Option<TGData>) -> Self {
         CompoundQuery { operation, target, content }
     }
 }
 
-pub impl TGQuery for CompoundQuery {
-    fn operation(&self) -> QueryOp {
-        self.operation
+impl TGQuery for CompoundQuery {
+    fn operation(&self) -> &QueryOp {
+        &self.operation
     }
-    fn target(&self) -> ResourceSpec {
-        self.target
+    fn target(&self) -> &ResourceSpec {
+        &self.target
     }
-    fn content(&self) -> Option<TGData> {
-        self.content
+    fn content(&self) -> &Option<TGData> {
+        &self.content
     }
 }
 
@@ -39,15 +44,15 @@ pub struct BaseResourceQuery {
     target: ResourceSpec,
 }
 
-pub impl TGQuery for BaseResourceQuery {
-    fn operation(&self) -> QueryOp {
-        RETRIEVE
+impl TGQuery for BaseResourceQuery {
+    fn operation(&self) -> &QueryOp {
+        &QueryOp::Retrieve
     }
-    fn target(&self) -> ResourceSpec {
-        self.target
+    fn target(&self) -> &ResourceSpec {
+        &self.target
     }
-    fn content(&self) -> Option<TGData> {
-        None
+    fn content(&self) -> &Option<TGData> {
+        &None
     }
 }
 

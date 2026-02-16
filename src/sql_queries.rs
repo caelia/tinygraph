@@ -15,7 +15,6 @@ pub mod sqlite3_pgsql {
         name TEXT UNIQUE NOT NULL
       );";
     
-    // pub const POPULATE_PRIMITIVE_TABLE_QQ: [&'static str; 11] =
     pub const POPULATE_PRIMITIVE_TABLE_QQ: [&'static str; 10] =
        ["INSERT INTO primitives (name) VALUES ('integer');",
         "INSERT INTO primitives (name) VALUES ('float');",
@@ -23,7 +22,7 @@ pub mod sqlite3_pgsql {
         "INSERT INTO primitives (name) VALUES ('string');",
         "INSERT INTO primitives (name) VALUES ('date');",
         "INSERT INTO primitives (name) VALUES ('time');",
-        "INSERT INTO primitives (name) VALUES ('period');",
+        "INSERT INTO primitives (name) VALUES ('duration');",
         "INSERT INTO primitives (name) VALUES ('nref');",
         "INSERT INTO primitives (name) VALUES ('rref');",
         // What is sref??
@@ -98,7 +97,6 @@ pub mod sqlite3_pgsql {
         class INTEGER REFERENCES type_classes(id)
       );";
     
-    // pub const POPULATE_TYPES_TABLE_QQ: [&'static str; 12] =
     pub const POPULATE_TYPES_TABLE_QQ: [&'static str; 11] =
        ["INSERT INTO types (name, class)
          SELECT 'integer', id FROM type_classes WHERE name = 'primitive';",
@@ -113,7 +111,7 @@ pub mod sqlite3_pgsql {
         "INSERT INTO types (name, class)
          SELECT 'time', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
-         SELECT 'period', id FROM type_classes WHERE name = 'primitive';",
+         SELECT 'duration', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
          SELECT 'nref', id FROM type_classes WHERE name = 'primitive';",
         "INSERT INTO types (name, class)
@@ -134,7 +132,6 @@ pub mod sqlite3_pgsql {
         member_type INTEGER REFERENCES types(id)
       );";
     
-    // pub const POPULATE_UNION_TYPE_TABLE_QQ: [&'static str; 11] =
     pub const POPULATE_UNION_TYPE_TABLE_QQ: [&'static str; 10] =
        ["INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'integer';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'float';",
@@ -142,7 +139,7 @@ pub mod sqlite3_pgsql {
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'string';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'date';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'time';",
-        "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'period';",
+        "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'duration';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'nref';",
         "INSERT INTO union_types (name, member_type) SELECT 'any', id FROM types WHERE types.name = 'rref';",
         /*

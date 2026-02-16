@@ -8,11 +8,12 @@ use tinygraph::Database;
 use tinygraph::cli::{Tgm, Args, Action};
 use tinygraph::app::App;
 use tinygraph::sqlite::database::SqliteDatabase;
+use tinygraph::tgconfig::Config;
 use clap::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let tgm = Tgm::new();
+    let tgm = Tgm::new(Config::new());
     match args.action {
         Action::Init => {
             let full_path = match args.path {
@@ -74,6 +75,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Some(str) => vec![("path".to_string(), str.to_string())],
                 None => return tg_error!("Can't convert path to string: '{:?}", parent_dir),
             };
+            // requires directory as PathBuf & filename as String 
             match SqliteDatabase::new(None, true, args.replace, opts) {
                 Ok(_) => {
                     println!("Database created.");

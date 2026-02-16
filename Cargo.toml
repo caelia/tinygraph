@@ -12,7 +12,7 @@ sophia_jsonld = "0.9"
 clap = { version = "4.5", features = ["derive"] }
 anyhow = "1.0"
 # toml = "0.5"
-# directories = "4.0"
+directories = "6.0"
 
 [features]
 default = ["sqlite"]

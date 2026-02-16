@@ -42,6 +42,12 @@ impl App for Tgm {
             }
         }
     }
+    fn default_name(&self) -> Result<String, Box<dyn std::error::Error>> {
+        match self.config_get("default_name".to_string()) {
+            Some(name) => Ok(name),
+            None => Ok("tg_data.db".to_string()),
+        }
+    }
     fn config_get(&self, key: String) -> Option<String> {
         self.config.get(key)
     }

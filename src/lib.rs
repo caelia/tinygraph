@@ -8,7 +8,6 @@ pub mod app;
 pub mod tgconfig;
 #[macro_use]
 pub mod error;
-#[cfg(feature = "sqlite")]
 pub mod sqlite;
 
 use rusqlite::{params, Connection};
@@ -41,23 +40,6 @@ struct Edge {
     id: u32,
     label: String,
     target: Target
-}
-
-/*
-pub trait DbOptions<T> {
-    fn new(opts: Vec<(String, T)>) -> Self;
-    fn get(&self, key: String) -> Result<Option<T>, Box<dyn std::error::Error>>; 
-    fn set(&mut self, key: String, value: T) -> Result<(), Box<dyn std::error::Error>>;
-}
-*/
-
-pub trait Database {
-    fn new(dir: PathBuf, filename: String, init: bool, replace: bool, 
-           options: Vec<(String, String)>)
-           -> Result<Self, Box<dyn std::error::Error>> where Self: Sized;
-    fn open(&mut self) -> Result<(), Box<dyn std::error::Error>>;
-    // fn connect(&mut self) { }
-    fn close(&mut self) -> Result<(), Box<dyn std::error::Error>>;
 }
 
     

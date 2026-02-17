@@ -14,23 +14,12 @@ use std::fs::create_dir_all;
 use crate::sqlite::sql;
 use crate::error::*;
 use crate::tgconfig;
-// use crate::{Database, DbOptions};
-use crate::Database;
 
-/*
-#[derive(Debug)]
-enum SqliteOption {
-    Bool(bool),
-    String(std::string::String),
-    PathBuf(std::path::PathBuf),
-}
-*/
 
 struct SqliteDbOptions {
     data: HashMap<String, String>,
 }
 
-// impl DbOptions<String> for SqliteDbOptions {
 impl SqliteDbOptions {
     fn new(options: Vec<(String, String)>) -> Self {
         let mut data = HashMap::new();
@@ -40,7 +29,7 @@ impl SqliteDbOptions {
         }
         SqliteDbOptions { data }
     }
-    // fn get(&self, key: String) -> Result<Option<SqliteOption>, Box<dyn std::error::Error>> {
+
     fn get(&self, key: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
         if Self::valid_key(&key) {
             match self.data.get(&key) {
@@ -51,7 +40,7 @@ impl SqliteDbOptions {
             tg_error!("invalid database option: '{}'", key)
         }
     }
-    // fn set(&self, key: String, value: SqliteOption) -> Result<(), Box<dyn std::error::Error>> {
+
     fn set(&mut self, key: String, value: String) -> Result<(), Box<dyn std::error::Error>> {
         if Self::valid_item(&key, &value) {
             let _ = self.data.insert(key, value);
@@ -60,17 +49,14 @@ impl SqliteDbOptions {
             tg_error!("Invalid database option: {}: {:?}", key, value)
         }
     }
-/*
-}
 
-impl SqliteDbOptions {
-    */
     fn valid_key(key: &str) -> bool {
         match key {
             "read"|"write"|"path"|"create_dir" => true,
             _ => false,
         }
     }
+
     fn valid_item(key: &str, value: &str) -> bool {
         match (key, value) {
             ("read", "true")
@@ -87,17 +73,14 @@ impl SqliteDbOptions {
 
 #[derive(Debug)]
 pub struct SqliteDatabase {
-    // path: &'a PathBuf,
     path: PathBuf,
     conn: Option<Connection>,
     options: HashMap<String,String>,
 }
 
 
-// impl<'a> Database<'a> {
-// impl<DBO: DbOptions> Database<DBO: DbOptions> for SqliteDatabase {
-impl Database for SqliteDatabase {
-    fn new(dir: PathBuf, fname: String, init: bool, replace: bool,
+impl SqliteDatabase {
+    pub fn new(dir: PathBuf, fname: String, init: bool, replace: bool,
            options: Vec<(String, String)>)
             -> Result<Self, Box<dyn std::error::Error>> {
         // let config = tgconfig::Config::new();
@@ -144,16 +127,6 @@ impl Database for SqliteDatabase {
         }
     }
     
-    /*
-
-    struct SqliteDbOptions {
-        
-    }
-    fn connect(&mut self) {
-    }
-    */
-
-    // fn close(&mut self) -> RsqResult<(), (Connection, RsqError)> {
     fn close(&mut self) -> RsqResult<(), Box<dyn std::error::Error>> {
         let conn = self.conn.take();
         if let Some(konn) = conn {
@@ -165,10 +138,8 @@ impl Database for SqliteDatabase {
             tg_error!("Attempted to close a nonexistent connection. This should never happen.")
         }
     }
-}
 
-impl SqliteDatabase {
-  fn initialize(dir: PathBuf, fname: String,  replace: bool) -> Result<Connection, Box<dyn std::error::Error>> {
+    fn initialize(dir: PathBuf, fname: String,  replace: bool) -> Result<Connection, Box<dyn std::error::Error>> {
         let full_path = dir.join(fname);
         if full_path.exists() {
             if replace {

@@ -2,27 +2,39 @@ use crate::tg_error;
 use crate::tgconfig::Config;
 use crate::app::App;
 use crate::error::*;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, Args};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-pub struct Args {
-    #[arg(long, short)]
-    pub name: Option<String>,
-    #[arg(long="type", short='t')]
-    pub db_type: Option<String>,
-    #[arg(long, short)]
-    pub path: Option<String>,
-    #[arg(long, short)]
-    pub replace: bool,
+pub struct MainCommand {
     #[command(subcommand)]
     pub action: Action,
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Action {
-    Init,
-    Query,
+    /// Initialize a database
+    Init(InitArgs),
+    /// Perform a query
+    Query(QueryArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct InitArgs {
+    /// Database filename
+    #[arg(long, short)]
+    pub name: Option<String>,
+    /// Directory where DB file is stored
+    #[arg(long, short)]
+    pub path: Option<String>,
+    /// If DB already exists, replace it with new file
+    #[arg(long, short)]
+    pub replace: bool,
+}
+
+#[derive(Args, Debug)]
+pub struct QueryArgs {
+    
 }
 
 pub struct Tgm {

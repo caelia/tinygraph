@@ -4,21 +4,21 @@
 use std::path::PathBuf;
 use tinygraph::tg_error;
 use tinygraph::error::TinyGraphError;
-use tinygraph::cli::{Tgm, Args, Action};
+use tinygraph::cli::{Tgm, MainCommand, Action};
 use tinygraph::app::App;
 use tinygraph::sqlite::database::SqliteDatabase;
 use tinygraph::tgconfig::Config;
 use clap::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
+    let args = MainCommand::parse();
     let tgm = Tgm::new(Config::default());
     match args.action {
-        Action::Init => {
-            let (dir, fname) = match args.path {
+        Action::Init(init_args) => {
+            let (dir, fname) = match init_args.path {
                 Some(p) => {
                     let path = PathBuf::from(p);
-                    let dbname = match args.name {
+                    let dbname = match init_args.name {
                         Some(name) => name,
                         None => {
                             match tgm.default_name() {
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         },
                         Err(e) => return tg_error!("{:?}", e)
                     };
-                    match args.name {
+                    match init_args.name {
                         Some(name) => (path, name),
                         None => {
                             match tgm.default_name() {
@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             };
             let opts = vec![];
-            match SqliteDatabase::new(dir, fname, true, args.replace, opts) {
+            match SqliteDatabase::new(dir, fname, true, init_args.replace, opts) {
                 Ok(_) => {
                     println!("Database created.");
                     Ok(())
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(e) => tg_error!("{:?}", e)
             }
         },
-        Action::Query => {
+        Action::Query(_) => {
             println!("OK, let's do a query!");
             Ok(())
         }
